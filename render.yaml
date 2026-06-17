@@ -1,0 +1,41 @@
+# Render Blueprint — deploys BOTH services on Render's free tier.
+#   talktodata-api : FastAPI backend  (free web service)
+#   talktodata-web : React frontend   (free static site)
+#
+# After the first deploy you must set 3 env vars (they reference each other's
+# URLs, so they can't be auto-filled on the very first build):
+#   1) On talktodata-api  -> ANTHROPIC_API_KEY = your sk-ant-... key
+#   2) On talktodata-web  -> VITE_API_BASE_URL = https://talktodata-api.onrender.com
+#   3) On talktodata-api  -> FRONTEND_ORIGIN   = https://talktodata-web.onrender.com
+# Then "Clear build cache & deploy" the frontend so Vite picks up the API URL.
+#
+# Note: the free web service sleeps after ~15 min idle; the first request after
+# it wakes can take ~50s (cold start). That is normal on the free plan.
+
+services:
+  - type: web
+    name: talktodata-api
+    runtime: python
+    plan: free
+    rootDir: backend
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false          # set in the Render dashboard (secret)
+      - key: FRONTEND_ORIGIN
+        sync: false          # set to the talktodata-web URL after first deploy
+
+  - type: web
+    name: talktodata-web
+    runtime: static
+    rootDir: frontend
+    buildCommand: "npm install && npm run build"
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        sync: false          # set to the talktodata-api URL, then redeploy
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html

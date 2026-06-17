@@ -44,12 +44,14 @@ is mobile-responsive.
 
 ## Deploying
 
-**Frontend (Vercel / Netlify):** build command `npm run build`, output `dist/`.
-Set `VITE_API_BASE_URL` to your deployed backend URL in the dashboard.
+**Free, all on Render:** the repo ships a Blueprint ([`render.yaml`](render.yaml))
+that deploys both the FastAPI backend and the React frontend on Render's free
+tier. Full step-by-step: **[DEPLOY.md](DEPLOY.md)**. (The hosting is free; the
+Claude API key costs only a few cents of usage.)
 
-**Backend:** deploy `backend/` (e.g. Render / Railway / Fly). Set `ANTHROPIC_API_KEY`
-and `FRONTEND_ORIGIN` (your deployed frontend URL, comma-separated for multiple)
-so CORS allows the production site.
+**Prefer Vercel / Netlify for the frontend?** Point it at `frontend/`, build
+`npm run build`, output `dist/`, and set `VITE_API_BASE_URL` to your backend URL.
+Keep the backend on Render and set `ANTHROPIC_API_KEY` + `FRONTEND_ORIGIN` there.
 
 ---
 
