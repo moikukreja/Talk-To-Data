@@ -1,0 +1,214 @@
+:root {
+  --bg: #0f1117;
+  --panel: #181b24;
+  --panel-2: #1f2330;
+  --text: #e6e8ee;
+  --muted: #9aa0ad;
+  --accent: #6ea8fe;
+  --ok: #3ddc84;
+  --ok-bg: rgba(61, 220, 132, 0.08);
+  --blocked: #ff6b6b;
+  --blocked-bg: rgba(255, 107, 107, 0.08);
+  --border: #2a2f3d;
+  --kw: #7aa2f7;
+  --str: #9ece6a;
+  --num: #e0af68;
+  --punct: #89ddff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.page {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 32px 16px 80px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 2rem;
+  letter-spacing: -0.02em;
+}
+.header p {
+  margin: 6px 0 24px;
+  color: var(--muted);
+}
+
+/* --- ask form --- */
+.ask {
+  display: flex;
+  gap: 8px;
+}
+.ask__input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--text);
+  font-size: 1rem;
+}
+.ask__input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+.ask__button {
+  padding: 14px 22px;
+  border-radius: 10px;
+  border: none;
+  background: var(--accent);
+  color: #0b1020;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+}
+.ask__button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* --- sample chips --- */
+.samples {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 14px 0 8px;
+}
+.samples__chip {
+  padding: 7px 12px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.samples__chip:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+/* --- states --- */
+.state {
+  margin-top: 22px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+}
+.state--loading {
+  color: var(--muted);
+  background: var(--panel);
+}
+.state--error {
+  color: var(--blocked);
+  background: var(--blocked-bg);
+  border-color: var(--blocked);
+}
+
+/* --- result --- */
+.result {
+  margin-top: 24px;
+  padding: 20px;
+  border-radius: 14px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-left-width: 5px;
+}
+.result--ok { border-left-color: var(--ok); }
+.result--blocked { border-left-color: var(--blocked); }
+
+.badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  padding: 3px 9px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+.badge--ok { background: var(--ok-bg); color: var(--ok); }
+.badge--blocked { background: var(--blocked-bg); color: var(--blocked); }
+
+.result__reason {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  color: var(--blocked);
+}
+
+/* --- answer --- */
+.answer { margin-bottom: 4px; }
+.answer--scalar {
+  font-size: 2.4rem;
+  font-weight: 700;
+  color: var(--ok);
+}
+.answer--error {
+  color: var(--blocked);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.answer--empty { color: var(--muted); }
+.answer--table table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.answer--table td {
+  border: 1px solid var(--border);
+  padding: 6px 10px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- SQL viewer (Guardrail 3) --- */
+.sql-viewer {
+  margin: 16px 0;
+}
+.sql-viewer__label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.sql-viewer__code {
+  margin: 0;
+  padding: 14px 16px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, "Cascadia Code", monospace;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.tok-keyword { color: var(--kw); font-weight: 600; }
+.tok-string { color: var(--str); }
+.tok-number { color: var(--num); }
+.tok-punct { color: var(--punct); }
+.tok-muted { color: var(--muted); font-style: italic; }
+
+/* --- review note --- */
+.result__note {
+  margin-top: 12px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--panel-2);
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* --- mobile --- */
+@media (max-width: 560px) {
+  .header h1 { font-size: 1.6rem; }
+  .ask { flex-direction: column; }
+  .ask__button { width: 100%; }
+  .answer--scalar { font-size: 2rem; }
+}
