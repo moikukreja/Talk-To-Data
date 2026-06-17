@@ -4,7 +4,7 @@ Case Study E · NL-to-SQL · MAIB, SP Jain Dubai.
 
 An NL-to-SQL engine built in three phases (rule-based → LLM → guardrails),
 exposed through a **FastAPI** backend and a **React + TypeScript** frontend.
-LLM provider: **Anthropic Claude `claude-sonnet-4-6`**.
+LLM provider: **Google Gemini `gemini-2.0-flash`** (free tier — no credit card).
 
 ## Deliverables
 1. **Solution plan** — in the notebook (Deliverable 1 section) and the chat transcript.
@@ -21,7 +21,7 @@ LLM provider: **Anthropic Claude `claude-sonnet-4-6`**.
 cd backend
 python -m venv .venv && . .venv/Scripts/activate     # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env        # then put your real ANTHROPIC_API_KEY in .env
+cp .env.example .env        # then put your real GEMINI_API_KEY in .env
 uvicorn app:app --reload --port 8000
 ```
 - `POST /ask  { "question": "..." }` → `{status, sql, answer, note}` or `{status, reason, sql}`.
@@ -46,12 +46,12 @@ is mobile-responsive.
 
 **Free, all on Render:** the repo ships a Blueprint ([`render.yaml`](render.yaml))
 that deploys both the FastAPI backend and the React frontend on Render's free
-tier. Full step-by-step: **[DEPLOY.md](DEPLOY.md)**. (The hosting is free; the
-Claude API key costs only a few cents of usage.)
+tier. Full step-by-step: **[DEPLOY.md](DEPLOY.md)**. Both the hosting **and** the
+Gemini API key are free (Google AI Studio free tier — no credit card).
 
 **Prefer Vercel / Netlify for the frontend?** Point it at `frontend/`, build
 `npm run build`, output `dist/`, and set `VITE_API_BASE_URL` to your backend URL.
-Keep the backend on Render and set `ANTHROPIC_API_KEY` + `FRONTEND_ORIGIN` there.
+Keep the backend on Render and set `GEMINI_API_KEY` + `FRONTEND_ORIGIN` there.
 
 ---
 

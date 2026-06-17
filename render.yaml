@@ -4,7 +4,7 @@
 #
 # After the first deploy you must set 3 env vars (they reference each other's
 # URLs, so they can't be auto-filled on the very first build):
-#   1) On talktodata-api  -> ANTHROPIC_API_KEY = your sk-ant-... key
+#   1) On talktodata-api  -> GEMINI_API_KEY = your Google AI Studio key
 #   2) On talktodata-web  -> VITE_API_BASE_URL = https://talktodata-api.onrender.com
 #   3) On talktodata-api  -> FRONTEND_ORIGIN   = https://talktodata-web.onrender.com
 # Then "Clear build cache & deploy" the frontend so Vite picks up the API URL.
@@ -21,7 +21,7 @@ services:
     buildCommand: "pip install -r requirements.txt"
     startCommand: "uvicorn app:app --host 0.0.0.0 --port $PORT"
     envVars:
-      - key: ANTHROPIC_API_KEY
+      - key: GEMINI_API_KEY
         sync: false          # set in the Render dashboard (secret)
       - key: FRONTEND_ORIGIN
         sync: false          # set to the talktodata-web URL after first deploy

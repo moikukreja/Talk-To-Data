@@ -36,8 +36,8 @@ cells.append(md(
     "### Case Study E · NL-to-SQL · MAIB · SP Jain Dubai",
     "",
     "**Subject:** Natural Language Processing — Machine Translation & NL-to-SQL  ",
-    "**Engine phases:** A) Rule-based · B) LLM-powered (Anthropic Claude `claude-sonnet-4-6`) · C) Guardrails  ",
-    "**LLM provider:** Anthropic Claude API — key supplied via environment variable, never hardcoded.",
+    "**Engine phases:** A) Rule-based · B) LLM-powered (Google Gemini `gemini-2.0-flash`) · C) Guardrails  ",
+    "**LLM provider:** Google Gemini API (free tier) — key supplied via environment variable, never hardcoded.",
     "",
     "> This notebook follows the **Predict → Run → Record** protocol: every code cell carries a",
     "> `# PREDICT:` comment stating the expected result *before* its output, and surprising results are",
@@ -76,11 +76,11 @@ cells.append(md(
 cells.append(md(
     "## Setup",
     "All dependencies install via `!pip` so the notebook is fully Colab-compatible — no local paths anywhere.",
-    "`sqlite3` and `random` are part of the Python standard library; `anthropic` is needed for Phase B/C.",
+    "`sqlite3` and `random` are part of the Python standard library; `google-genai` is needed for Phase B/C.",
 ))
 cells.append(code([
-    "# Colab-compatible install (no local paths). anthropic is used in Phase B/C.",
-    "!pip -q install anthropic",
+    "# Colab-compatible install (no local paths). google-genai is used in Phase B/C.",
+    "!pip -q install google-genai",
 ]))
 
 # ---------------------------------------------------------------- Step 0 DB
@@ -238,11 +238,11 @@ cells.append(md(
 # ---------------------------------------------------------------- Phase B
 cells.append(md(
     "## Phase B — LLM-Based NL-to-SQL",
-    "*The neural machine-translation leap.* Instead of hand-written rules, **Anthropic Claude",
-    "`claude-sonnet-4-6`** translates English to SQL. The key technique: put the database **schema** into",
+    "*The neural machine-translation leap.* Instead of hand-written rules, **Google Gemini",
+    "`gemini-2.0-flash`** translates English to SQL. The key technique: put the database **schema** into",
     "the prompt so the model knows the target 'grammar', then ask it to translate.",
     "",
-    "> **About the outputs below:** they are **representative of a live `claude-sonnet-4-6` run** against the",
+    "> **About the outputs below:** they are **representative of a live `gemini-2.0-flash` run** against the",
     "> `seed=42` database. The result *numbers* are real (computed from this exact DB), but the **exact SQL",
     "> text varies per run** because the LLM is non-deterministic — that non-determinism is the whole point of",
     "> the hallucination demo. Run the cells in Colab with your own key to reproduce.",
@@ -256,17 +256,18 @@ cells.append(code([
     "import os, getpass",
     "",
     "# Prefer Colab Secrets, then existing env var, then a masked prompt. Never hardcoded.",
-    "if not os.environ.get('ANTHROPIC_API_KEY'):",
+    "# Get a FREE key (no credit card) at https://aistudio.google.com/apikey",
+    "if not os.environ.get('GEMINI_API_KEY'):",
     "    try:",
     "        from google.colab import userdata        # Colab: Secrets panel (key icon)",
-    "        os.environ['ANTHROPIC_API_KEY'] = userdata.get('ANTHROPIC_API_KEY')",
+    "        os.environ['GEMINI_API_KEY'] = userdata.get('GEMINI_API_KEY')",
     "    except Exception:",
-    "        os.environ['ANTHROPIC_API_KEY'] = getpass.getpass('Enter your Anthropic API key: ')",
+    "        os.environ['GEMINI_API_KEY'] = getpass.getpass('Enter your Google AI Studio (Gemini) API key: ')",
     "",
-    "import anthropic",
-    "client = anthropic.Anthropic()      # reads ANTHROPIC_API_KEY from the environment",
-    "MODEL = 'claude-sonnet-4-6'",
-    "print('Claude client ready -> model:', MODEL)",
+    "from google import genai",
+    "client = genai.Client(api_key=os.environ['GEMINI_API_KEY'])",
+    "MODEL = 'gemini-2.0-flash'        # Google Gemini, free tier",
+    "print('Gemini client ready -> model:', MODEL)",
 ]))
 
 cells.append(md(
@@ -289,7 +290,7 @@ cells.append(code([
 
 cells.append(md(
     "### The translation function + a robust SQL extractor",
-    "The prompt instructs Claude to return **ONLY SQL, no markdown**. Claude usually complies, but the",
+    "The prompt instructs Gemini to return **ONLY SQL, no markdown**. It usually complies, but the",
     "extractor robustly strips ```` ```sql ```` fences / a leading `sql` label if they ever appear (fixing the",
     "case study's fragile `.strip('`').replace('sql\\\\n','')`).",
 ))
@@ -313,12 +314,11 @@ cells.append(code([
     "",
     "Question: {question}",
     "SQL:'''",
-    "    resp = client.messages.create(",
+    "    resp = client.models.generate_content(",
     "        model=MODEL,",
-    "        max_tokens=400,",
-    "        messages=[{'role': 'user', 'content': prompt}],",
+    "        contents=prompt,",
     "    )",
-    "    text = ''.join(b.text for b in resp.content if b.type == 'text')",
+    "    text = resp.text or ''",
     "    return _extract_sql(text)",
     "",
     "def run_sql(sql):",
@@ -333,7 +333,7 @@ cells.append(md(
     "### The question Phase A could not answer (Q2 — needs a join + grouping)",
 ))
 cells.append(code([
-    "# PREDICT: Phase A returned None here. Claude should produce a JOIN + GROUP BY + SUM + ORDER/LIMIT.",
+    "# PREDICT: Phase A returned None here. Gemini should produce a JOIN + GROUP BY + SUM + ORDER/LIMIT.",
     "sql = llm_nl2sql('Which product category earns the most revenue?')",
     "print(sql)",
     "print(run_sql(sql))",
@@ -482,7 +482,7 @@ cells.append(code([
     "            'note': 'Review the SQL above before trusting this number.'}",
     "",
     "def trusted_nl2sql(question):",
-    "    return _guard(llm_nl2sql(question))   # Claude translates; guardrails gate the result",
+    "    return _guard(llm_nl2sql(question))   # Gemini translates; guardrails gate the result",
 ]))
 
 cells.append(md(
@@ -552,7 +552,7 @@ cells.append(md(
     "| --- | --- |",
     "| **Rule-based translation (RBMT)** | **Phase A** — hand-written keyword rules; brittle, returned `None` on unseen questions, silently ignored 'last week'. |",
     "| **The vocabulary-mismatch problem** | 'customer' vs the `customers` table; 'how much sold' vs `total_amount`; 'repeat' vs `is_repeat`. |",
-    "| **Neural / learned translation (NMT)** | **Phase B** — Claude learned NL→SQL from data; handled the join + grouping (Q2) we never coded a rule for. |",
+    "| **Neural / learned translation (NMT)** | **Phase B** — Gemini learned NL→SQL from data; handled the join + grouping (Q2) we never coded a rule for. |",
     "| **The schema as target grammar** | The `SCHEMA` text in the prompt told the model the rules of the target language. |",
     "| **Hallucination** | Valid SQL that answered the wrong question — the 'repeat customers' query that ignored the join + `is_repeat` filter (₹5067.18 vs the correct ₹5123.86). |",
     "| **Faithfulness vs fluency** | A query can be **fluent** (valid SQL that runs) yet **unfaithful** (answers a different question). |",
@@ -569,7 +569,7 @@ cells.append(md(
     "trust the answer.\"*",
     "",
     "---",
-    "**Engine complete.** Phase A (rules) → Phase B (Claude `claude-sonnet-4-6`) → Phase C (guardrails). The same",
+    "**Engine complete.** Phase A (rules) → Phase B (Gemini `gemini-2.0-flash`) → Phase C (guardrails). The same",
     "`trusted_nl2sql` contract powers the FastAPI backend in Deliverable 3.",
 ))
 

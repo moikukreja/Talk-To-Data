@@ -2,7 +2,7 @@
 TalkToData engine — the exact three-phase NL-to-SQL contract from the notebook,
 packaged for the FastAPI backend.
 
-  Phase B : Claude `claude-sonnet-4-6` translates English -> SQLite SQL.
+  Phase B : Google Gemini `gemini-2.0-flash` translates English -> SQLite SQL.
   Phase C : three guardrails gate every result; trusted_nl2sql() always returns
             a consistent dict with a `status` key.
 
@@ -96,15 +96,16 @@ Notes: is_repeat is 1 for repeat customers, 0 otherwise.
 Dates are stored as TEXT in YYYY-MM-DD format.
 """
 
-MODEL = "claude-sonnet-4-6"
+MODEL = "gemini-2.0-flash"  # Google Gemini, free tier (Google AI Studio)
 _client = None  # lazily created so the module imports without a key present
 
 
 def _get_client():
     global _client
     if _client is None:
-        import anthropic  # imported lazily; requires ANTHROPIC_API_KEY in env
-        _client = anthropic.Anthropic()
+        from google import genai  # lazy import; requires GEMINI_API_KEY in env
+        api_key = os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
+        _client = genai.Client(api_key=api_key)
     return _client
 
 
@@ -127,12 +128,11 @@ Return ONLY the SQL, no explanation, no markdown fences.
 
 Question: {question}
 SQL:"""
-    resp = _get_client().messages.create(
+    resp = _get_client().models.generate_content(
         model=MODEL,
-        max_tokens=400,
-        messages=[{"role": "user", "content": prompt}],
+        contents=prompt,
     )
-    text = "".join(b.text for b in resp.content if b.type == "text")
+    text = resp.text or ""
     return _extract_sql(text)
 
 
@@ -191,7 +191,7 @@ def guard(sql: str) -> dict:
 
 
 def trusted_nl2sql(question: str) -> dict:
-    """Translate with Claude, then gate through the guardrails."""
+    """Translate with Gemini, then gate through the guardrails."""
     try:
         sql = llm_nl2sql(question)
     except Exception as e:  # noqa: BLE001 — e.g. missing key / network

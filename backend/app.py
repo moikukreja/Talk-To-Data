@@ -19,7 +19,7 @@ from pydantic import BaseModel
 
 from engine import trusted_nl2sql
 
-load_dotenv()  # read backend/.env (ANTHROPIC_API_KEY, FRONTEND_ORIGIN)
+load_dotenv()  # read backend/.env (GEMINI_API_KEY, FRONTEND_ORIGIN)
 
 app = FastAPI(title="TalkToData", version="1.0.0")
 

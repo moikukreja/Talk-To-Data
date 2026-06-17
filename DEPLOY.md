@@ -1,7 +1,7 @@
 # Deploying TalkToData on Render (free)
 
-Everything below uses **Render's free tier**. The only paid part is the Claude
-API key itself (a few cents of usage — see the README).
+Everything below is **free** — Render's free tier for hosting, and Google AI
+Studio's free tier for the Gemini API key (no credit card).
 
 The repo ships a Blueprint ([`render.yaml`](render.yaml)) that creates **two**
 free services:
@@ -21,10 +21,12 @@ free services:
    expected; we fix it in Step 3.
 
 ## Step 2 — Set the API key on the backend
-1. Open the **`talktodata-api`** service → **Environment**.
-2. Add **`ANTHROPIC_API_KEY`** = your `sk-ant-...` key → **Save Changes**
-   (this redeploys the backend).
-3. Copy the backend URL from the top of the page, e.g.
+1. Get a free key at **https://aistudio.google.com/apikey** (sign in with Google
+   → **Create API key** → copy it).
+2. Open the **`talktodata-api`** service → **Environment**.
+3. Add **`GEMINI_API_KEY`** = your key → **Save Changes** (this redeploys the
+   backend).
+4. Copy the backend URL from the top of the page, e.g.
    `https://talktodata-api.onrender.com`.
 
 ## Step 3 — Point the frontend at the backend
@@ -46,8 +48,10 @@ free services:
 - **Cold starts:** the free backend sleeps after ~15 min idle; the first request
   after it wakes takes ~50s. Subsequent requests are fast. (Ask once to "wake"
   it before a demo.)
-- **Secrets:** `ANTHROPIC_API_KEY` lives only in Render's dashboard — never in
+- **Secrets:** `GEMINI_API_KEY` lives only in Render's dashboard — never in
   the repo. `.env` is git-ignored.
+- **Free-tier limits:** Gemini's free tier allows roughly 15 requests/min and
+  ~1,500/day on `gemini-2.0-flash` — far more than this app needs.
 - **Prefer Vercel/Netlify for the frontend instead?** You can: point it at the
   `frontend/` folder, build `npm run build`, output `dist`, and set
   `VITE_API_BASE_URL` the same way. Keep the backend on Render.

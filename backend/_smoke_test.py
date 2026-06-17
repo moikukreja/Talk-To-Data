@@ -5,7 +5,7 @@ import json
 import engine
 from fastapi.testclient import TestClient
 
-# Stub Claude with a deterministic router so we can test all guardrail paths.
+# Stub the LLM with a deterministic router so we can test all guardrail paths.
 def fake_llm(question, schema=engine.SCHEMA):
     q = question.lower()
     if "mumbai" in q:
